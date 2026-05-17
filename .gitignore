@@ -1,0 +1,7 @@
+.env
+.venv/
+chroma_db/
+weeek_kb.log
+__pycache__/
+*.pyc
+.pytest_cache/
