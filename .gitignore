@@ -5,6 +5,6 @@ weeek_kb.log
 __pycache__/
 *.pyc
 .pytest_cache/
-data/*.bak
-data/weeek-playwright-session.json
-data/.web-comments-progress/
+
+# Локальные экспорты досок, meta-info, сессия Playwright (не в git)
+data/

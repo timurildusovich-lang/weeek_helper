@@ -2,7 +2,7 @@
 
 Telegram-бот с RAG-поиском по задачам [Weeek](https://weeek.net): локальные JSON-экспорты досок → векторный индекс (ChromaDB + OpenAI embeddings) → ответы из описаний и комментариев. Отдельно — постановка новых задач в Weeek через Public API.
 
-Проект рассчитан на **несколько досок (сайтов/клиентов)**: у каждой доски свой файл `data/board-*.json` и своя коллекция в Chroma.
+Проект рассчитан на **несколько досок (сайтов/клиентов)**: у каждой доски локальный файл `data/board-*.json` и своя коллекция в Chroma. Каталог `data/` **не хранится в git**; список досок — в `config/active-board-ids.json`.
 
 ---
 
@@ -34,9 +34,12 @@ flowchart TB
     WEB[Weeek Web UI Playwright]
   end
 
-  subgraph data [data/]
+  subgraph data [data/ локально]
     BOARDS["board-*.json"]
     META[meta-info.json]
+  end
+
+  subgraph config [config/ в git]
     ACTIVE[active-board-ids.json]
   end
 
@@ -92,9 +95,11 @@ source .venv/bin/activate
 
 pip install -r requirements.txt
 playwright install chromium
+mkdir data
+copy config\meta-info.json.example data\meta-info.json
 ```
 
-Создайте `.env` в корне (см. [ниже](#конфигурация-env)). Файл в `.gitignore`, в репозиторий не коммитить.
+Создайте `.env` в корне (см. [ниже](#конфигурация-env)). Файл в `.gitignore`, в репозиторий не коммитить. Каталог `data/` тоже не в git — появится после `get_tasks` или копирования с другой машины.
 
 Первый полный индекс после настройки:
 
@@ -129,15 +134,23 @@ python -m weeek_kb.bot
 
 ---
 
-## Каталог data/
+## Каталог data/ (локально, не в git)
+
+Папка `data/` в `.gitignore`. Создайте её на сервере и заполните скриптами `get_tasks` / `get_comments` или скопируйте с рабочей машины.
 
 | Файл / маска | Описание |
 |--------------|----------|
 | `board-{id}-{slug}.json` | Задачи одной доски Weeek (`meta` + массив `задачи`) |
-| `active-board-ids.json` | Список **boardId**, участвующих в ingest, боте, get_tasks, get_comments |
-| `meta-info.json` | `last_id`, `last_date` — якорь для API и фильтра комментариев |
-| `weeek-playwright-session.json` | Cookies сессии браузера (не коммитить при необходимости) |
+| `meta-info.json` | `last_id`, `last_date` — якорь для API и фильтра комментариев (шаблон: [`config/meta-info.json.example`](config/meta-info.json.example)) |
+| `weeek-playwright-session.json` | Cookies сессии браузера |
 | `.web-comments-progress/*.jsonl` | Опциональный sidecar прогресса комментариев |
+
+### config/ (в репозитории)
+
+| Файл | Описание |
+|------|----------|
+| [`active-board-ids.json`](config/active-board-ids.json) | Список **boardId** для ingest, бота, `get_tasks`, `get_comments` |
+| `meta-info.json.example` | Пример `meta-info.json` для копирования в `data/` |
 
 ### Формат `board-*.json`
 
@@ -168,7 +181,7 @@ python -m weeek_kb.bot
 
 ### Активные доски
 
-[`data/active-board-ids.json`](data/active-board-ids.json):
+[`config/active-board-ids.json`](config/active-board-ids.json):
 
 ```json
 {
@@ -374,7 +387,8 @@ python -m weeek_kb.bot
 
 ```
 weeek_helper/
-├── data/                    # JSON досок, meta, active-board-ids
+├── config/                  # active-board-ids.json (в git)
+├── data/                    # JSON досок локально (gitignore)
 ├── chroma_db/               # векторная БД (gitignore)
 ├── deploy/                  # шаблоны systemd
 ├── tests/

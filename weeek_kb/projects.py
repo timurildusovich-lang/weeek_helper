@@ -34,7 +34,7 @@ def collection_name_from_stem(stem: str) -> str:
 
 
 def load_active_board_ids(path: Path | None = None) -> frozenset[int]:
-    """ID досок из data/active-board-ids.json (поле boardIds)."""
+    """ID досок из config/active-board-ids.json (поле boardIds)."""
     ids_path = path or ACTIVE_BOARD_IDS_FILE
     if not ids_path.is_file():
         raise FileNotFoundError(
@@ -57,11 +57,10 @@ def load_projects(
     active_board_ids: frozenset[int] | None = None,
 ) -> list[Project]:
     base = data_dir or DATA_DIR
-    ids_file = base / ACTIVE_BOARD_IDS_FILE.name
     allowed = (
         active_board_ids
         if active_board_ids is not None
-        else load_active_board_ids(ids_file if ids_file.is_file() else ACTIVE_BOARD_IDS_FILE)
+        else load_active_board_ids()
     )
     projects: list[Project] = []
     for path in sorted(base.glob("board-*.json")):

@@ -9,7 +9,8 @@ load_dotenv(ROOT / ".env")
 # Paths (ROOT defined above for dotenv)
 DATA_DIR = ROOT / "data"
 CHROMA_DIR = ROOT / "chroma_db"
-ACTIVE_BOARD_IDS_FILE = DATA_DIR / "active-board-ids.json"
+CONFIG_DIR = ROOT / "config"
+ACTIVE_BOARD_IDS_FILE = CONFIG_DIR / "active-board-ids.json"
 
 # Weeek workspace in task URLs: https://app.weeek.net/ws/<id>/task/<taskId>
 WEEEK_WORKSPACE_ID = os.getenv("WEEEK_WORKSPACE_ID", "423726")
